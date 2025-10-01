@@ -92,7 +92,11 @@ Below is a screenshot of one of the workflows in n8n:
 ## 🌐 Example Output
 Here’s an example of the generated HTML landing page:  
 
-[Generated Landing Page](output_html_preview.png)   
+Github Hosted: https://bubblipathic.github.io/Blog-to-Landing-Page-Using-n8n/landing-page
+
+![Generated Landing Page](/Screenshots/html_1.png)   
+![Generated Landing Page](/Screenshots/html_2.png)  
+![Generated Landing Page](/Screenshots/html_3.png)  
 
 ---
 
