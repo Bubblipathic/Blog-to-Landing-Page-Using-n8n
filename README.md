@@ -6,7 +6,7 @@ All workflows are **self-hosted**:
 - **n8n** runs in a Docker container thru Docker compose.
 - **PostgreSQL** is self-hosted in Docker as the main database.
 - **ngrok** is used to expose the local n8n instance for secure external API access and trigger webhooks.
-- 
+  
 ---
 
 ## 🚀 Workflows Overview
