@@ -1,0 +1,3198 @@
+{
+  "name": "Blog to Landing Page",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.rss }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -1680,
+        1008
+      ],
+      "id": "b4dfd285-90b6-4ddd-a3b3-9d9782f85b2f",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "dda47c0b-b0b2-46f0-a469-cd1b0e1b8152",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              },
+              "leftValue": "={{ $json.isoDate }}",
+              "rightValue": "={{ $now.minus(1,\"days\") }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a8ec4ede-30af-445e-9973-d4aefa0e7ab8",
+      "name": "Filter",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -2064,
+        1216
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1696,
+        1216
+      ],
+      "id": "6d05095a-b813-45be-9151-6d5e328daab7",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "rss",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1888,
+        1008
+      ],
+      "id": "b7e3b201-4cb9-4679-9f11-153a8fd9551c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a27cf1eb-3eef-4e7f-ade6-06fd6eadb509",
+              "name": "rss",
+              "value": "[   \"https://www.gsmarena.com/rss-news-reviews.php3\",   \"https://www.androidauthority.com/feed/\",   \"https://www.theverge.com/rss/index.xml\",   \"https://www.techradar.com/feeds/article/phones\",   \"https://www.phonearena.com/feed\",   \"https://www.engadget.com/rss.xml\",   \"https://9to5google.com/feed/\",   \"https://www.xda-developers.com/feed/\",   \"https://pocketnow.com/feed/\",   \"https://www.androidcentral.com/rss\" ]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2096,
+        1008
+      ],
+      "id": "f749d408-4082-4340-9e6d-b10b2f9694ac",
+      "name": "links"
+    },
+    {
+      "parameters": {
+        "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query__q_', ``, 'string') }}",
+        "location": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Location__location_', ``, 'string') }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        16,
+        96
+      ],
+      "id": "18cad08a-9774-4175-80ef-ffab009aba5a",
+      "name": "Google search in SerpApi",
+      "credentials": {
+        "serpApi": {
+          "id": "oqB2n6ngzn0l4kLz",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"headline\": [\"string\", \"string\"],\n  \"maincontent\": \"string\",\n  \"structure\": {\n    \"introduction\": [\"string\"],\n    \"body\": [\"string\", \"string\"],\n    \"conclusion\": [\"string\"]\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        96
+      ],
+      "id": "2ce85d90-1708-4a77-9a5c-fca36ac9db99",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e9f27ceb-c5f2-4997-8cb1-67576a7bb337",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "id": "4c4f9417-40f2-4fb0-9976-d09f5984680f",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json['content:encodedSnippet'] ?? $json.contentSnippet}}"
+            },
+            {
+              "id": "e1986bac-054e-4240-ba50-536dbcd27337",
+              "name": "date",
+              "type": "string",
+              "value": "={{ $json.isoDate}}"
+            },
+            {
+              "id": "9566e23c-ac30-4d66-abbd-889f322688b7",
+              "name": "link",
+              "type": "string",
+              "value": "={{ $json.link }}"
+            },
+            {
+              "id": "61203b8d-7198-4087-83dc-83ac83afa5b1",
+              "name": "categories",
+              "type": "string",
+              "value": "={{ $json.categories }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "57192e43-020e-4e01-b203-35926d90fe59",
+      "name": "get title",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1888,
+        1216
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        112
+      ],
+      "id": "abe75fff-db28-4d60-954f-c13e1d434853",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "g0yqTJsUEEFxxUAs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1664,
+        96
+      ],
+      "id": "a5f3c409-0f47-4cf2-9e44-f12eed5e290e",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "g0yqTJsUEEFxxUAs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        -96
+      ],
+      "id": "bb279b54-3c6a-4346-8d50-62a328fe29b4",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -208,
+        544
+      ],
+      "id": "8f0e6f5a-f939-4eb5-931b-1747a2c9b0f1",
+      "name": "Schedule Trigger2",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 480,
+        "width": 1536
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -432,
+        -192
+      ],
+      "id": "9a43dc14-ecb1-41c9-a5c7-d0782aea434f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0081b266-c781-4073-b252-6b69004824ba",
+              "name": "id",
+              "value": "={{ $('Generate prompt').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "27a50934-4e4a-4b3e-addb-1e58fc40e17f",
+              "name": "jobId",
+              "value": "={{$node[\"Submit Query\"].json[\"id\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        464
+      ],
+      "id": "ab447ceb-eb88-4082-a350-d19821eb862d",
+      "name": "Store job ID"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        464
+      ],
+      "id": "b0c9e91b-4828-47a5-a66c-7fae40edd090",
+      "name": "Wait",
+      "webhookId": "b1394fea-58a5-4b2e-a62e-b386b24e7773"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS blog_research (\n    id SERIAL PRIMARY KEY,\n    headlines TEXT[],\n    maincontent TEXT,\n    structure JSONB,\n    enhanced_output TEXT,\n    featured_image TEXT[],\n    generated_html TEXT\n);\n\n\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        512,
+        -96
+      ],
+      "id": "2b0cff4d-6de5-44db-8a69-bb9ca0605ec6",
+      "name": "One time Create Table",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "headlines": "={{ $('Normalize').item.json.headline }}",
+            "maincontent": "={{ $('Normalize').item.json.maincontent }}",
+            "structure": "={{ $('Normalize').item.json.structure }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "headlines",
+              "displayName": "headlines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "maincontent",
+              "displayName": "maincontent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "structure",
+              "displayName": "structure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "featured_image",
+              "displayName": "featured_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "enhanced_output",
+              "displayName": "enhanced_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "generated_html",
+              "displayName": "generated_html",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        736,
+        -96
+      ],
+      "id": "06519088-a158-4574-b875-0029992ffe7e",
+      "name": "Store headlines, content, structure",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "# Role\nYou are an AI research assistant specializing in **smartphone news and blogs**. Your purpose is to analyze search engine results (from SERP API) and produce a clean, structured summary of the most relevant and trending smartphone topic.\n\n# Task\nYou will receive search results from SERP API for queries such as **\"latest trending smartphone blog\"** or similar keywords. Using this input:\n\n1. Identify the **most relevant and trending smartphone topic** (e.g., new smartphone release, major software update, controversy, or innovation).\n2. Extract and summarize:\n   - **Headlines** \n   - **Main content summary** \n   - **Outline/Structure** \n\n# Output Format\nReturn your answer **only in valid JSON** (no explanations, no Markdown).  \nThe JSON schema must be:\n\n{\n  \"headline\": [\"string\", \"string\"],\n  \"maincontent\": \"string\",\n  \"structure\": {\n    \"introduction\": [\"string\"],\n    \"body\": [\"string\", \"string\"],\n    \"conclusion\": [\"string\"]\n  }\n}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        -96
+      ],
+      "id": "ed55aba4-f44c-4594-af4e-7bc1e8b70a55",
+      "name": "Research Trends in Smartphones"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "headlines",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "maincontent",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "structure",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "featured_image",
+              "condition": "IS NULL"
+            },
+            {
+              "column": "enhanced_output",
+              "condition": "IS NULL"
+            },
+            {
+              "column": "generated_html",
+              "condition": "IS NULL"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1440,
+        -96
+      ],
+      "id": "c747ee33-5d99-484f-9e9f-579869e06b58",
+      "name": "Select headlines, content, structure",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd61e2d1-f4ba-4ec3-986c-bc3e2ea3be4a",
+              "name": "id",
+              "value": "={{ $('Store job ID').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "9b77da5c-5fd4-410d-b683-3a4fc3fbc10b",
+              "name": "imgTemp",
+              "value": "={{ $('Getting URL or Base64 data').item.json.generations[0].img }}",
+              "type": "string"
+            },
+            {
+              "id": "9b9f2e9f-e729-4ca3-95a6-60152c60cf43",
+              "name": "seed",
+              "value": "={{ $('Getting URL or Base64 data').item.json.generations[0].seed }}",
+              "type": "string"
+            },
+            {
+              "id": "9817d268-a6f6-4a1f-9c12-58ae1f0b5a25",
+              "name": "imageURL",
+              "value": "=https://ruyxqaoryydkhxlixuvw.supabase.co/storage/v1/object/public/ai-image/feature-image-{{ $('Store job ID').item.json.id }}.webp",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        464
+      ],
+      "id": "a7e246f6-d280-4e10-95e5-7399b961fc4c",
+      "name": "Keep Metadata"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "featured_image",
+              "condition": "IS NULL"
+            },
+            {
+              "column": "headlines",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "maincontent",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "structure",
+              "condition": "IS NOT NULL"
+            }
+          ]
+        },
+        "sort": {
+          "values": [
+            {
+              "column": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -16,
+        544
+      ],
+      "id": "719240d8-a2f0-408d-8219-805c73f7f50e",
+      "name": "Select headlines, content, structure1",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fc8d94c0-e60b-46c0-9166-b08ac9baebc4",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "2f7b9779-2fc4-40e8-a1b5-441dee0cb785",
+              "name": "prompt1",
+              "value": "= {{ \"Create a Featured blog image: \" +  $json.headlines + \" - high and accurate detail, editorial illustration\"}} ",
+              "type": "string"
+            },
+            {
+              "id": "d7ae54a7-630e-4607-a1d9-286d55cd4022",
+              "name": "prompt2",
+              "value": "= {{ \"Create a supporting visual illustration about: \" +  $json.structure.body + \" - symbolic, abstract, and supportive\"}} ",
+              "type": "string"
+            },
+            {
+              "id": "59d1b7af-8b87-4d66-943b-2aaa8ebd2060",
+              "name": "prompt3",
+              "value": "= {{ \"Create a supporting visual illustration about: \" +  $json.structure.conclusion + \" - light, subtle, and supportive\"}} ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        544
+      ],
+      "id": "b47791cb-aaea-4239-8d35-cd94ed3cfcae",
+      "name": "Generate prompt"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://stablehorde.net/api/v2/generate/async",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Client-Agent",
+              "value": "n8n-stablehorde/1.0"
+            },
+            {
+              "name": "apikey",
+              "value": "0000000000"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt1 }}\",\n  \"params\": {\n    \"width\": 512,\n    \"height\": 512,\n    \"sampler_name\": \"k_euler\",\n    \"steps\": 20,\n    \"cfg_scale\": 7,\n    \"n\": 1,\n    \"models\": [\"stable_diffusion\"],\n    \"nsfw\": false\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        464
+      ],
+      "id": "85129402-24a7-4b67-b41d-84a7c92a4bde",
+      "name": "Submit Query"
+    },
+    {
+      "parameters": {
+        "url": "=https://stablehorde.net/api/v2/generate/status/{{ $('Store job ID').item.json.jobId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "0000000000"
+            },
+            {
+              "name": "Client-Agent",
+              "value": "n8n-stablehorde/1.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        464
+      ],
+      "id": "7e08bcc9-c6ca-49cc-84ef-bbc9cffecd00",
+      "name": "Get Img URL",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// increment attempts and stop if too many retries\nconst it = items[0];\nit.json.attempts = (it.json.attempts || 0) + 1;\nif (it.json.attempts > 20) {\n  throw new Error('Max polling attempts reached');\n}\nreturn it;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        464
+      ],
+      "id": "50c91291-65cb-4924-b9bf-1c600bfa3d01",
+      "name": "Limit in 20 tries"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ec5c31cb-fa53-49f2-a985-5d05b4a010ad",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        464
+      ],
+      "id": "500010e6-6fff-437b-a3c4-1ad4480a4387",
+      "name": "If done"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.generations[0].img }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "image_data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        464
+      ],
+      "id": "b6d9d667-757d-488b-a09d-0f03d764edea",
+      "name": "Fetch Image File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = items[0];\nconst gens = item.json.generations || [];\nif (!gens.length) throw new Error('No generations in response');\n\nconst gen = gens[0]; // take first generation\nconst imgVal = gen.img || '';\nconst mime = gen.mime_type || 'image/png';\n\nif (imgVal.startsWith('http')) {\n  // hosted image URL\n  item.json.imageUrl = imgVal;\n  return [item];\n} else {\n  // base64 data -> create binary\n  const buffer = Buffer.from(imgVal, 'base64');\n  item.binary = item.binary || {};\n  item.binary.image = {\n    data: buffer,\n    mimeType: mime,\n    fileName: 'stablehorde.png',\n  };\n  return [item];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        464
+      ],
+      "id": "19024b2c-d1a4-47fd-bbb6-55ffbf0328ba",
+      "name": "Getting URL or Base64 data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0081b266-c781-4073-b252-6b69004824ba",
+              "name": "id",
+              "value": "={{ $('Generate prompt').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "27a50934-4e4a-4b3e-addb-1e58fc40e17f",
+              "name": "jobId",
+              "value": "={{$node[\"Submit Query1\"].json[\"id\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        720
+      ],
+      "id": "df3649a3-2fcf-4fa3-af7f-df64f0d1c6b4",
+      "name": "Store job ID1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        720
+      ],
+      "id": "64abcc00-d6bb-4fcd-b8ab-ada566fffc59",
+      "name": "Wait1",
+      "webhookId": "b1394fea-58a5-4b2e-a62e-b386b24e7773"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://stablehorde.net/api/v2/generate/async",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Client-Agent",
+              "value": "n8n-stablehorde/1.0"
+            },
+            {
+              "name": "apikey",
+              "value": "0000000000"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt2 }}\",\n  \"params\": {\n    \"width\": 512,\n    \"height\": 512,\n    \"sampler_name\": \"k_euler\",\n    \"steps\": 20,\n    \"cfg_scale\": 7,\n    \"n\": 1,\n    \"models\": [\"stable_diffusion\"],\n    \"nsfw\": false\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        720
+      ],
+      "id": "f2843c1e-4f56-46a4-9111-c882eb114868",
+      "name": "Submit Query1"
+    },
+    {
+      "parameters": {
+        "url": "=https://stablehorde.net/api/v2/generate/status/{{ $('Store job ID1').item.json.jobId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "0000000000"
+            },
+            {
+              "name": "Client-Agent",
+              "value": "n8n-stablehorde/1.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        720
+      ],
+      "id": "1dc8bf6f-07ce-4ef1-94c2-9f89e0d69509",
+      "name": "Get Img URL1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// increment attempts and stop if too many retries\nconst it = items[0];\nit.json.attempts = (it.json.attempts || 0) + 1;\nif (it.json.attempts > 20) {\n  throw new Error('Max polling attempts reached');\n}\nreturn it;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        720
+      ],
+      "id": "ea09be64-f69a-4a3c-82bc-acb81411bd64",
+      "name": "Limit in 20 tries1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ec5c31cb-fa53-49f2-a985-5d05b4a010ad",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        720
+      ],
+      "id": "a8e1e272-69a3-4b19-9125-6f85f31ec3c0",
+      "name": "If done1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.generations[0].img }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "image_data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        720
+      ],
+      "id": "edf5e94c-d9c2-49a7-a65d-0292ac1d38bc",
+      "name": "Fetch Image File1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = items[0];\nconst gens = item.json.generations || [];\nif (!gens.length) throw new Error('No generations in response');\n\nconst gen = gens[0]; // take first generation\nconst imgVal = gen.img || '';\nconst mime = gen.mime_type || 'image/png';\n\nif (imgVal.startsWith('http')) {\n  // hosted image URL\n  item.json.imageUrl = imgVal;\n  return [item];\n} else {\n  // base64 data -> create binary\n  const buffer = Buffer.from(imgVal, 'base64');\n  item.binary = item.binary || {};\n  item.binary.image = {\n    data: buffer,\n    mimeType: mime,\n    fileName: 'stablehorde.png',\n  };\n  return [item];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        720
+      ],
+      "id": "3c7b9a5e-f25e-4cd3-af6f-7a6023c97fcb",
+      "name": "Getting URL or Base64 data1"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 928,
+        "width": 3504,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        384
+      ],
+      "typeVersion": 1,
+      "id": "73ae209b-c4a9-47b4-a150-a0e46d09344d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0081b266-c781-4073-b252-6b69004824ba",
+              "name": "id",
+              "value": "={{ $('Generate prompt').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "27a50934-4e4a-4b3e-addb-1e58fc40e17f",
+              "name": "jobId",
+              "value": "={{$node[\"Submit Query2\"].json[\"id\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        992
+      ],
+      "id": "845a6d9d-89f7-4da9-8da8-9fe918e5a5ad",
+      "name": "Store job ID2"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        992
+      ],
+      "id": "ac661c7e-8a8a-488e-8177-96ba2f35c28d",
+      "name": "Wait2",
+      "webhookId": "b1394fea-58a5-4b2e-a62e-b386b24e7773"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://stablehorde.net/api/v2/generate/async",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "content-type",
+              "value": "application/json"
+            },
+            {
+              "name": "Client-Agent",
+              "value": "n8n-stablehorde/1.0"
+            },
+            {
+              "name": "apikey",
+              "value": "0000000000"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.prompt3 }}\",\n  \"params\": {\n    \"width\": 512,\n    \"height\": 512,\n    \"sampler_name\": \"k_euler\",\n    \"steps\": 20,\n    \"cfg_scale\": 7,\n    \"n\": 1,\n    \"models\": [\"stable_diffusion\"],\n    \"nsfw\": false\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        992
+      ],
+      "id": "0ddaa1e7-4f5e-4508-8864-cb826c637ecf",
+      "name": "Submit Query2"
+    },
+    {
+      "parameters": {
+        "url": "=https://stablehorde.net/api/v2/generate/status/{{ $('Store job ID2').item.json.jobId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "0000000000"
+            },
+            {
+              "name": "Client-Agent",
+              "value": "n8n-stablehorde/1.0"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        992
+      ],
+      "id": "8ecaf869-c49b-44a4-b71d-6ff054f7d075",
+      "name": "Get Img URL2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// increment attempts and stop if too many retries\nconst it = items[0];\nit.json.attempts = (it.json.attempts || 0) + 1;\nif (it.json.attempts > 20) {\n  throw new Error('Max polling attempts reached');\n}\nreturn it;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        992
+      ],
+      "id": "af78734a-bfde-4991-ba12-cdd7f31e0ec3",
+      "name": "Limit in 20 tries2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ec5c31cb-fa53-49f2-a985-5d05b4a010ad",
+              "leftValue": "={{ $json.done }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1392,
+        992
+      ],
+      "id": "e428ebd5-285d-4d86-bb54-91149cb33332",
+      "name": "If done2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.generations[0].img }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "image_data"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1584,
+        992
+      ],
+      "id": "90c47523-b473-4f20-b7e3-86aafe1edf5d",
+      "name": "Fetch Image File2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = items[0];\nconst gens = item.json.generations || [];\nif (!gens.length) throw new Error('No generations in response');\n\nconst gen = gens[0]; // take first generation\nconst imgVal = gen.img || '';\nconst mime = gen.mime_type || 'image/png';\n\nif (imgVal.startsWith('http')) {\n  // hosted image URL\n  item.json.imageUrl = imgVal;\n  return [item];\n} else {\n  // base64 data -> create binary\n  const buffer = Buffer.from(imgVal, 'base64');\n  item.binary = item.binary || {};\n  item.binary.image = {\n    data: buffer,\n    mimeType: mime,\n    fileName: 'stablehorde.png',\n  };\n  return [item];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        992
+      ],
+      "id": "dbca78df-0d6c-4665-a3f1-87a0a5c7429f",
+      "name": "Getting URL or Base64 data2"
+    },
+    {
+      "parameters": {
+        "content": "## Temp Trash Bin\n",
+        "height": 1056,
+        "width": 768,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2240,
+        896
+      ],
+      "typeVersion": 1,
+      "id": "571cce25-a143-4a54-a0c4-9d04fcc96fac",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE blog_research\nSET featured_image = COALESCE(featured_image, '{}') || ARRAY['{{ $(\"Keep Metadata\").item.json.imageURL }}']\nWHERE id = {{ $(\"Keep Metadata\").item.json.id }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2752,
+        464
+      ],
+      "id": "af5ede1f-447b-4b05-94c8-63c893ccf53e",
+      "name": "Add Image to Postgre",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Select headlines, content, structure').item.json.id }}",
+            "enhanced_output": "={{ $('Enhance Contents').item.json.output }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "headlines",
+              "displayName": "headlines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "maincontent",
+              "displayName": "maincontent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "structure",
+              "displayName": "structure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "featured_image",
+              "displayName": "featured_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "enhanced_output",
+              "displayName": "enhanced_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2032,
+        -96
+      ],
+      "id": "9bf39c1c-743d-4425-8fa5-cd68bcac1a83",
+      "name": "Add Contents in Postgre",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 480,
+        "width": 1424,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1136,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "85755788-26c2-4516-ba53-e7c6c0688139",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        1536
+      ],
+      "id": "fea796ea-079a-4846-b744-7bed436c5e12",
+      "name": "Schedule Trigger3"
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "featured_image",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "enhanced_output",
+              "condition": "IS NOT NULL"
+            },
+            {
+              "column": "generated_html",
+              "condition": "IS NULL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        304,
+        1536
+      ],
+      "id": "7906c8d4-9e47-4acb-acc4-4afd319af098",
+      "name": "Select Enchanced Content and Images",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4245cafd-26a4-4a21-8e15-e0b8f0bc51f4",
+              "name": "headline",
+              "value": "={{ $json.output.headline }}",
+              "type": "array"
+            },
+            {
+              "id": "c2c82b2c-247e-4601-9c77-a038452b88e0",
+              "name": "maincontent",
+              "value": "={{ $json.output.maincontent }}",
+              "type": "string"
+            },
+            {
+              "id": "4519c20f-6989-4ede-b911-ae8297682483",
+              "name": "structure.introduction",
+              "value": "={{ $json.output.structure.introduction }}",
+              "type": "array"
+            },
+            {
+              "id": "974f2564-1c50-47eb-8a60-05e636781848",
+              "name": "structure.body",
+              "value": "={{ $json.output.structure.body }}",
+              "type": "array"
+            },
+            {
+              "id": "1732c586-4be9-4d47-8102-812bd26ec32a",
+              "name": "structure.conclusion",
+              "value": "={{ $json.output.structure.conclusion }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        -96
+      ],
+      "id": "5e210814-c0fb-40e3-8023-f50db65f8fa6",
+      "name": "Normalize"
+    },
+    {
+      "parameters": {
+        "path": "generate-landing",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1424,
+        2160
+      ],
+      "id": "39e317e4-944c-4886-bae4-982bbe3e0dc2",
+      "name": "Webhook",
+      "webhookId": "56716d62-d116-46fd-93c1-0bfa79b5cf50"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        512,
+        1696
+      ],
+      "id": "ed105cd6-140c-49fc-b580-276e1cf34745",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "g0yqTJsUEEFxxUAs",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Select Enchanced Content and Images').item.json.id }}",
+            "generated_html": "={{ $('Cleaning data').item.json.output_html }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "headlines",
+              "displayName": "headlines",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "maincontent",
+              "displayName": "maincontent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "structure",
+              "displayName": "structure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "featured_image",
+              "displayName": "featured_image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "array",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "enhanced_output",
+              "displayName": "enhanced_output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "generated_html",
+              "displayName": "generated_html",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1344,
+        1536
+      ],
+      "id": "b6e69e6f-da4d-4eeb-a574-1897fea12306",
+      "name": "Add html Postgre",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.generated_html }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=UTF-8"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        -1024,
+        2160
+      ],
+      "id": "33846835-9f65-418b-bd02-9fc33f258bf0",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cf7c8e3b-08e8-4096-88b1-756eb060c517",
+              "leftValue": "={{ $json.Key }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b050aede-6886-42cc-9620-8e2616a2e5a2",
+              "leftValue": "={{ $json.Id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2144,
+        464
+      ],
+      "id": "e8b18541-95d0-49d2-a141-c48652a924fc",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd61e2d1-f4ba-4ec3-986c-bc3e2ea3be4a",
+              "name": "id",
+              "value": "={{ $('Store job ID1').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "9b77da5c-5fd4-410d-b683-3a4fc3fbc10b",
+              "name": "imgTemp",
+              "value": "={{ $('Getting URL or Base64 data1').item.json.generations[0].img }}",
+              "type": "string"
+            },
+            {
+              "id": "9b9f2e9f-e729-4ca3-95a6-60152c60cf43",
+              "name": "seed",
+              "value": "={{ $('Getting URL or Base64 data1').item.json.generations[0].seed }}",
+              "type": "string"
+            },
+            {
+              "id": "9817d268-a6f6-4a1f-9c12-58ae1f0b5a25",
+              "name": "imageURL",
+              "value": "=https://ruyxqaoryydkhxlixuvw.supabase.co/storage/v1/object/ai-image/1st-supporing-image-{{ $('Store job ID1').item.json.id }}.webp",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2352,
+        720
+      ],
+      "id": "9821b936-51c2-436f-a38f-25a0a427fca7",
+      "name": "Keep Metadata1"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE blog_research\nSET featured_image = COALESCE(featured_image, '{}') || ARRAY['{{ $(\"Keep Metadata1\").item.json.imageURL }}']\nWHERE id = {{ $(\"Keep Metadata1\").item.json.id }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2752,
+        720
+      ],
+      "id": "bf0e7e2c-f442-4e55-a56d-e32cbc72f792",
+      "name": "Add Image to Postgre1",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cf7c8e3b-08e8-4096-88b1-756eb060c517",
+              "leftValue": "={{ $json.Key }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b050aede-6886-42cc-9620-8e2616a2e5a2",
+              "leftValue": "={{ $json.Id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2144,
+        720
+      ],
+      "id": "897ea6ea-34c8-4959-8767-9bca4ab5305b",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd61e2d1-f4ba-4ec3-986c-bc3e2ea3be4a",
+              "name": "id",
+              "value": "={{ $('Store job ID2').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "9b77da5c-5fd4-410d-b683-3a4fc3fbc10b",
+              "name": "imgTemp",
+              "value": "={{ $('Getting URL or Base64 data2').item.json.generations[0].img }}",
+              "type": "string"
+            },
+            {
+              "id": "9b9f2e9f-e729-4ca3-95a6-60152c60cf43",
+              "name": "seed",
+              "value": "={{ $('Getting URL or Base64 data2').item.json.generations[0].seed }}",
+              "type": "string"
+            },
+            {
+              "id": "9817d268-a6f6-4a1f-9c12-58ae1f0b5a25",
+              "name": "imageURL",
+              "value": "=https://ruyxqaoryydkhxlixuvw.supabase.co/storage/v1/object/ai-image/2nd-supporing-image-{{ $('Store job ID2').item.json.id }}.webp",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2336,
+        992
+      ],
+      "id": "65f14397-648b-42b7-beb5-fdba8f7c25cb",
+      "name": "Keep Metadata2"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE blog_research\nSET featured_image = COALESCE(featured_image, '{}') || ARRAY['{{ $(\"Keep Metadata2\").item.json.imageURL }}']\nWHERE id = {{ $(\"Keep Metadata2\").item.json.id }};",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        2736,
+        992
+      ],
+      "id": "a3b22bd3-934d-487b-bfe2-53efe3438fde",
+      "name": "Add Image to Postgre2",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cf7c8e3b-08e8-4096-88b1-756eb060c517",
+              "leftValue": "={{ $json.Key }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "b050aede-6886-42cc-9620-8e2616a2e5a2",
+              "leftValue": "={{ $json.Id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2128,
+        992
+      ],
+      "id": "727e9259-1b18-4314-8ce9-c952e24a08ce",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ruyxqaoryydkhxlixuvw.supabase.co/storage/v1/object/ai-image/feature-image-{{ $('Store job ID').item.json.id }}.webp",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"apikey\": \"sb_secret_7JRvqMfe-ZNPR9UAimv8Fg_RVuK2Mqp\",\n  \"Authorization\": \"Bearer sb_secret_7JRvqMfe-ZNPR9UAimv8Fg_RVuK2Mqp\",\n  \"Content-Type\": \"image/webp\"\n}",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "image_data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1984,
+        464
+      ],
+      "id": "385540bb-d618-493d-b28c-93c230c6bd78",
+      "name": "Store in Supabase"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ruyxqaoryydkhxlixuvw.supabase.co/storage/v1/object/ai-image/1st-supporing-image-{{ $('Store job ID1').item.json.id }}.webp",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"apikey\": \"sb_secret_7JRvqMfe-ZNPR9UAimv8Fg_RVuK2Mqp\",\n  \"Authorization\": \"Bearer sb_secret_7JRvqMfe-ZNPR9UAimv8Fg_RVuK2Mqp\",\n  \"Content-Type\": \"image/webp\"\n}",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "image_data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1984,
+        720
+      ],
+      "id": "37c80823-decc-4c8d-8d03-fecbaf5ee8e3",
+      "name": "Store in Supabase1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ruyxqaoryydkhxlixuvw.supabase.co/storage/v1/object/ai-image/2nd-supporing-image-{{ $('Store job ID2').item.json.id }}.webp",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"apikey\": \"sb_secret_7JRvqMfe-ZNPR9UAimv8Fg_RVuK2Mqp\",\n  \"Authorization\": \"Bearer sb_secret_7JRvqMfe-ZNPR9UAimv8Fg_RVuK2Mqp\",\n  \"Content-Type\": \"image/webp\"\n}",
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "image_data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1968,
+        992
+      ],
+      "id": "9ab5dab3-c85d-4a52-a666-7d8136a383f8",
+      "name": "Store in Supabase2"
+    },
+    {
+      "parameters": {
+        "jsCode": "let raw = $input.first().json.output || '';\n// remove ```html and ``` markers\nraw = raw.replace(/```html/, '').replace(/```/, '').trim();\nreturn [{ json: { output_html: raw } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        1536
+      ],
+      "id": "edc791d0-35e5-4a18-a8aa-c96b2db5c8b2",
+      "name": "Cleaning data"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE blog_research\nSET generated_html = NULL",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2032,
+        1664
+      ],
+      "id": "3e3c6498-ea33-4f3b-8529-e5f1463ffe57",
+      "name": "Remove Rows",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "limit": 3,
+        "where": {
+          "values": [
+            {
+              "column": "id",
+              "condition": "IS NOT NULL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -2032,
+        1440
+      ],
+      "id": "f447bb93-2010-4021-b50e-e1f979062ada",
+      "name": "Select Enchanced Content and Images2",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "generated_html",
+              "condition": "IS NOT NULL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1984,
+        1488
+      ],
+      "id": "ec7cbf9b-fdae-47be-ab8b-4b3853e454d1",
+      "name": "Select generated html",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "generated_html",
+              "condition": "IS NOT NULL"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1216,
+        2160
+      ],
+      "id": "5e07e764-151e-4855-9cef-e72133202470",
+      "name": "Select generated html1",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Role\nYou are a professional web developer AI. Your goal is to transform improved blog content into a responsive, modern, visually appealing **landing page** (not just a plain blog).\n\n# Input\n- A Markdown-formatted blog post in {{ $json.enhanced_output }}\n- An array of image URLs in {{ $json.featured_image }}\n\n# Requirements\n1. Use {{ $json.featured_image[0] }} as the **hero image** at the top with the blog title and a short subtitle overlayed.\n2. Use {{ $json.featured_image[1] }} and {{ $json.featured_image[2] }} as **supporting visuals** inside the blog content (placed logically).\n3. Convert the Markdown blog content into **semantic HTML5**:\n   - Blog title as `<h1>`\n   - Section headers `<h2>`, `<h3>`\n   - Paragraphs `<p>`\n   - Lists `<ul>`, `<ol>` where appropriate\n4. Add **landing page elements**:\n   - A short subtitle under the main title\n   - A prominent **call-to-action (CTA) button** below the hero section\n   - Optional feature highlights (e.g., 3-column cards for key points)\n   - A simple footer with branding or copyright\n5. Apply responsive, modern styling inside `<style>`:\n   - Mobile-first, centered container (`max-width: 800px`)\n   - Font: `Inter` or `Roboto`, clean typography\n   - Adequate spacing and line height for readability\n   - Images: `max-width: 100%`, `border-radius: 12px`, subtle box-shadows\n   - Color scheme: neutral background (`#f8f9fa`), dark text (`#333`), and a primary accent color (teal or blue) for headings, links, and buttons\n   - Hero section with a **subtle gradient overlay**\n   - Add hover effects on links and buttons for interactivity\n6. Include **simple inline JavaScript functions** inside `<script>`:\n   - Smooth scroll for CTA button\n   - Optional interactive element (e.g., alert on click, back-to-top button, or dark mode toggle)\n   - Keep the JavaScript lightweight and self-contained\n7. Return a **single, self-contained HTML5 file** with:\n   - `<html>`, `<head>`, `<body>`\n   - Inline `<style>` for CSS\n   - Inline `<script>` for simple JavaScript\n\n# Output\nReturn the complete HTML5 landing page with:\n- Hero section (hero image + blog title + subtitle + CTA)\n- Blog content styled from {{ $json.enhanced_output }}\n- Supporting visuals placed logically\n- Feature highlights or styled content sections\n- Footer\n- Clean, colorful, professional design\n- Fully responsive layout\n- working inline JavaScript function for interactivity\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        512,
+        1536
+      ],
+      "id": "f2b95b16-91a8-439c-908c-551d865f76fd",
+      "name": "AI-Generated HTML/CSS/JS"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assume the HTML string is in `item.html`\nconst htmlContent = $input.first().json.generated_html; \nreturn {\n  json: {},\n  binary: {\n    data: {\n      data: Buffer.from(htmlContent).toString('base64'),\n      mimeType: 'text/html',\n      fileName: 'landing-page.html',\n    }\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1808,
+        1664
+      ],
+      "id": "01b828a1-1a45-4d2d-86bf-563f901a9f88",
+      "name": "Convert to binary file"
+    },
+    {
+      "parameters": {
+        "content": "# WORKFLOW 1 : Research Blog Topic\n\n\n## - Here I used *Gemini Chat model* to analyze and identify topics, as well as extract contents from search results from *SERP API* for queries such as \"latest trending smartphone blog\"\n\n## - I used postgeSQL to store its outputs",
+        "height": 480,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -896,
+        -192
+      ],
+      "id": "acc8d4eb-1a6b-4cdf-8a04-b7c7d538d857",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 432,
+        "width": 1632,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        1424
+      ],
+      "typeVersion": 1,
+      "id": "0f55df16-4365-4979-b941-2b399cb548a2",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "formTitle": "email",
+        "formDescription": "send us the email where we will send the html",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "What is your email?",
+              "fieldType": "email",
+              "placeholder": "sample@gmail.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        1792,
+        1488
+      ],
+      "id": "cf7c06fa-e50f-4076-9a0f-b91ac4ec7f40",
+      "name": "On form submission",
+      "webhookId": "3ae41696-3e74-4b4f-89e2-47900f8b2343"
+    },
+    {
+      "parameters": {
+        "content": "# Automated Blog-to-Landing-Page Workflow with AI\n\n##  - Chosen Niche is Smartphones\n##  - I self-hosted n8n and used ngrok as tunnel to trigger webhooks\n## - Temporary ngrok public URL : https://ada-subsimple-charmain.ngrok-free.dev/\n## - Postgres was used to store data locally",
+        "height": 272,
+        "width": 944,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        -640
+      ],
+      "typeVersion": 1,
+      "id": "016668fb-b121-4c78-b5ce-5329f14364e2",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# WORKFLOW 3 : Generate Images with AI\n\n## - Here I used  stablehorde in generating AI Images. I made three prompts for the three images I will use, one for the feature image, and 2 or supporting images\n\n##      - I used the outputs from the first workflow (headlines and structure) in making the prompt\n\n## - I used Supabase to store the generated image in cloud, while also being able to access it thru a stable URL\n\n## - I used postgreSQL to store the stable URL",
+        "height": 944,
+        "width": 512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        384
+      ],
+      "typeVersion": 1,
+      "id": "50fdadf3-a892-4d35-b29e-70f5ee8c811d",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# WORKFLOW 2 : Enhance Blog with AI\n\n## - Here I used Gemini again to expand the context and turn the three contents (headlines, maincontent, and structure) into a one detailed output\n\n## - I used postgres again to store that output in a new column but stil under the same row of the three contents",
+        "height": 480,
+        "width": 544,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2624,
+        -192
+      ],
+      "typeVersion": 1,
+      "id": "83f59a4c-53a8-4973-a8b6-8633a9b07419",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "# WORKFLOW 4 : Build a Simple Landing Page with AI\n\n## - I used Gemini again for generating the HTML. I used the enhanced context from workflow 2 and the three generated image from workflow 3 as part of the pompt\n\n## - in the prompt I added specific instructions like values of attributes\n\n## - I added a function node that removes remove markup markers. and then I store it in postgreSQL as text",
+        "height": 432,
+        "width": 784,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        1424
+      ],
+      "typeVersion": 1,
+      "id": "bbadb2ec-f122-4c5c-a66e-a028d2e7cbd2",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 304,
+        "width": 816,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        2080
+      ],
+      "typeVersion": 1,
+      "id": "bc99eadb-ccc3-433d-8687-33c99e2b06d4",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## This is used for previewing the generated html\n\n\n## - https://ada-subsimple-charmain.ngrok-free.dev/webhook-test/generate-landing for test\n\n## - https://ada-subsimple-charmain.ngrok-free.dev/webhook/generate-landing for production",
+        "height": 304,
+        "width": 592,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2192,
+        2080
+      ],
+      "typeVersion": 1,
+      "id": "6dc25404-c1c6-403b-9c37-7d5dc3cdd035",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 432,
+        "width": 704
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1648,
+        1424
+      ],
+      "typeVersion": 1,
+      "id": "e298b0c5-0e5a-4b3e-959d-8b1eaaed1f63",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "content": "# WORKFLOW 5 : Export Final Landing Page\n\n## -  https://ada-subsimple-charmain.ngrok-free.dev/form-test/3ae41696-3e74-4b4f-89e2-47900f8b2343 - test\n## -  https://ada-subsimple-charmain.ngrok-free.dev/form/3ae41696-3e74-4b4f-89e2-47900f8b2343 - production\n\n## -  Use the links above to submit your email. \n\n## - After submitting ,the workflow will be triggered to send the html file in the submitted email",
+        "height": 432,
+        "width": 784
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2384,
+        1424
+      ],
+      "typeVersion": 1,
+      "id": "1f105526-46fb-4d06-aa6c-bf9dfb0ac275",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "fromEmail": "=jayreario@gmail.com",
+        "toEmail": "={{ $('On form submission').item.json['What is your email?'] }}",
+        "subject": "n8n - Automated Blog to Landing Page",
+        "emailFormat": "text",
+        "text": "Attached below is the AI generated Landing Page",
+        "options": {
+          "attachments": "data"
+        }
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        2016,
+        1664
+      ],
+      "id": "1cb062ba-8445-422f-8671-aecaefa4d0c4",
+      "name": "Send email",
+      "webhookId": "a9777c3f-433f-492c-8365-8c96f4c37881",
+      "credentials": {
+        "smtp": {
+          "id": "gPk4PRPSfxkyJAfw",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        -96
+      ],
+      "id": "e2a39854-bd67-4833-94e3-4379f35cf430",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "deleteTable",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "blog_research",
+          "mode": "list",
+          "cachedResultName": "blog_research"
+        },
+        "deleteCommand": "drop",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        -1728,
+        1472
+      ],
+      "id": "81a97ea7-5344-4c3c-bf4e-7c4b9e9773ef",
+      "name": "delete row",
+      "credentials": {
+        "postgres": {
+          "id": "Ze7AuzxKd1uXOcrP",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "# Role\nYou are a professional blog writer who specializes in smartphones and technology. Your goal is to take structured research notes and transform them into a high-quality, engaging blog post.\n\n# Task\nYou will receive JSON input with three fields: \"headline\", \"maincontent\", and \"structure\".\n\n1. Expand the \"maincontent\" into a well-written introduction paragraph.  \n2. Search the web for more details about the topi\n3. Choose the **most relevant headline** as the blog title (use the first one if in doubt).  \n4. Ensure the article flows logically, with smooth transitions between sections.  \n5. Use a professional yet engaging tone, suitable for a tech blog.  \n\n# Output Format\nReturn the result in **Markdown** with:\n- A title (`# ...`)\n- Section headers (`## ...`)\n- Paragraphs of expanded content\n\n# Constraints\n- Do not invent specs, prices, or release details that weren’t in the input.  \n- Keep it factual and clear.  ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1664,
+        -96
+      ],
+      "id": "d65076b7-ab31-448d-965b-0a5746af15f7",
+      "name": "Enhance Contents"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "get title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "links": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google search in SerpApi": {
+      "ai_tool": [
+        [
+          {
+            "node": "Research Trends in Smartphones",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Research Trends in Smartphones",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get title": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Research Trends in Smartphones",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Enhance Contents",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Select headlines, content, structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Select headlines, content, structure1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store job ID": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Img URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One time Create Table": {
+      "main": [
+        [
+          {
+            "node": "Store headlines, content, structure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store headlines, content, structure": {
+      "main": [
+        []
+      ]
+    },
+    "Research Trends in Smartphones": {
+      "main": [
+        [
+          {
+            "node": "Normalize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Metadata": {
+      "main": [
+        [
+          {
+            "node": "Add Image to Postgre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select headlines, content, structure1": {
+      "main": [
+        [
+          {
+            "node": "Generate prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate prompt": {
+      "main": [
+        [
+          {
+            "node": "Submit Query",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Submit Query1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Submit Query2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Query": {
+      "main": [
+        [
+          {
+            "node": "Store job ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Img URL": {
+      "main": [
+        [
+          {
+            "node": "Limit in 20 tries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit in 20 tries": {
+      "main": [
+        [
+          {
+            "node": "If done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If done": {
+      "main": [
+        [
+          {
+            "node": "Fetch Image File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Image File": {
+      "main": [
+        [
+          {
+            "node": "Getting URL or Base64 data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getting URL or Base64 data": {
+      "main": [
+        [
+          {
+            "node": "Store in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store job ID1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get Img URL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Query1": {
+      "main": [
+        [
+          {
+            "node": "Store job ID1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Img URL1": {
+      "main": [
+        [
+          {
+            "node": "Limit in 20 tries1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit in 20 tries1": {
+      "main": [
+        [
+          {
+            "node": "If done1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If done1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Image File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Image File1": {
+      "main": [
+        [
+          {
+            "node": "Getting URL or Base64 data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getting URL or Base64 data1": {
+      "main": [
+        [
+          {
+            "node": "Store in Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store job ID2": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Get Img URL2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Submit Query2": {
+      "main": [
+        [
+          {
+            "node": "Store job ID2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Img URL2": {
+      "main": [
+        [
+          {
+            "node": "Limit in 20 tries2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit in 20 tries2": {
+      "main": [
+        [
+          {
+            "node": "If done2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If done2": {
+      "main": [
+        [
+          {
+            "node": "Fetch Image File2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Image File2": {
+      "main": [
+        [
+          {
+            "node": "Getting URL or Base64 data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Getting URL or Base64 data2": {
+      "main": [
+        [
+          {
+            "node": "Store in Supabase2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select headlines, content, structure": {
+      "main": [
+        [
+          {
+            "node": "Enhance Contents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Contents in Postgre": {
+      "main": [
+        []
+      ]
+    },
+    "Schedule Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Select Enchanced Content and Images",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Enchanced Content and Images": {
+      "main": [
+        [
+          {
+            "node": "AI-Generated HTML/CSS/JS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize": {
+      "main": [
+        [
+          {
+            "node": "One time Create Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Select generated html1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI-Generated HTML/CSS/JS",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Keep Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Metadata1": {
+      "main": [
+        [
+          {
+            "node": "Add Image to Postgre1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Keep Metadata1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store in Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Metadata2": {
+      "main": [
+        [
+          {
+            "node": "Add Image to Postgre2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Keep Metadata2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store in Supabase2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store in Supabase": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store in Supabase1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store in Supabase2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleaning data": {
+      "main": [
+        [
+          {
+            "node": "Add html Postgre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select generated html1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI-Generated HTML/CSS/JS": {
+      "main": [
+        [
+          {
+            "node": "Cleaning data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select generated html": {
+      "main": [
+        [
+          {
+            "node": "Convert to binary file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to binary file": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Select generated html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Research Trends in Smartphones",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enhance Contents": {
+      "main": [
+        [
+          {
+            "node": "Add Contents in Postgre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "59996edc-ae7c-4cfd-b870-82adb14f9db8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8bff06e663119096a5b2401c62d1e41867c803324c01a368dfb7dd727a04c16c"
+  },
+  "id": "uczwBrdZz51DE2wJ",
+  "tags": []
+}
