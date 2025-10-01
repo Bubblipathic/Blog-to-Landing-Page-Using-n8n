@@ -85,7 +85,7 @@ All workflows are **self-hosted**:
 ## 📸 Workflow Previews
 Below is a screenshot of one of the workflows in n8n:  
 
-[Workflow Screenshot](workflow_screenshot.png)  
+![Workflow Screenshot](/Screenshots/workflow_screenshot.png)  
 
 ---
 
